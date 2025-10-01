@@ -149,7 +149,14 @@ function SubmitRestaurant() {
 
   const onSubmit = async (data) => {
     try {
+      toast.info('서버 연결 중... 최대 1분 정도 소요될 수 있습니다.', {
+        autoClose: false,
+        toastId: 'loading'
+      });
+      
       const response = await submissionAPI.createSubmission(data);
+      
+      toast.dismiss('loading');
       
       if (response) {
         setSubmitted(true);
@@ -158,8 +165,14 @@ function SubmitRestaurant() {
         setTimeout(() => setSubmitted(false), 5000);
       }
     } catch (error) {
+      toast.dismiss('loading');
       console.error('Submission error:', error);
-      toast.error('제출 중 오류가 발생했습니다.');
+      
+      if (error.code === 'ECONNABORTED') {
+        toast.error('서버 응답 시간이 초과되었습니다. 다시 시도해주세요.');
+      } else {
+        toast.error('제출 중 오류가 발생했습니다.');
+      }
     }
   };
 
